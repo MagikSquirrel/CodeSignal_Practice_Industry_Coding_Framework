@@ -23,7 +23,7 @@ def get_size(size):
     s = 0
     if size.endswith("kb"):
         asint = size[:-2]
-        s = int(asint) * 1024
+        s = int(asint)# * 1024
     return s
 
 def FILE_UPLOAD_AT(timestamp, file_name, file_size, ttl=None):
@@ -69,10 +69,11 @@ def FILE_GET_AT(timestamp, file_name):
     # Is this a ttl file?
     if file_name in expires:
         ttl = expires.get(file_name)
-        expiry = current + timedelta(seconds=ttl)
+        time = datetime.fromisoformat(times.get(file_name))
+        expire_limit = time + timedelta(seconds=ttl)
 
         # Expired?
-        if(expiry >= current):
+        if(current >= expire_limit):
             return "file not found"
 
     # regular file
@@ -84,14 +85,15 @@ def FILE_COPY(source, dest):
 
 def FILE_COPY_AT(timestamp, file_from, file_to):
     FILE_COPY(file_from, file_to)
-    times[file_to] = timestamp
+    # Don't store timestamp of copied file... we seem to want to retain it according to unit tests?
+    #times[file_to] = timestamp
     return f"copied at {file_from} to {file_to}"
 
 def FILE_SEARCH(prefix):
     # Find files matching name
     matches = list(filter(lambda x: x.startswith(prefix), files.keys()))
 
-    # Sort by size
+    # Sort by size (descending)
     matches.sort(key=lambda x: files.get(x), reverse=True)
 
     return f"found {matches}".replace("'", "")
@@ -101,7 +103,6 @@ def FILE_SEARCH_AT(timestamp, prefix):
     return output.replace("found ", "found at ")
 
 def ROLLBACK(timestamp):
-
     # Delete anything after the rollback
     rollback = datetime.fromisoformat(timestamp)
 
@@ -113,14 +114,15 @@ def ROLLBACK(timestamp):
                 #print("too new, rollbak")
                 deletions.append(file)
 
-
     for file in deletions:
         if file in expires:
             expires.pop(file)
         if file in times:
-            times.pop(file)
+            times.pop(file)        
         if file in files:
-            files.pop(file)
+            # Don't delete the file itself, instead wipe it's size?
+            #files.pop(file)
+            files[file] = 0
 
     return f"rollback to {timestamp}"
 
@@ -159,5 +161,4 @@ def simulate_coding_framework(list_of_lists):
             raise NotImplementedError(f"Don't know how to {op}")
 
     return output
-    #return ["uploaded Cars.txt", "got Cars.txt", "copied Cars.txt to Cars2.txt", "got Cars2.txt"]
     #pass

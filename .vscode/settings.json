@@ -2,10 +2,10 @@
   "python.testing.unittestArgs": [
     "-v",
     "-s",
-    "./practice_assessments",
+    "./practice_assessments/file_storage",
     "-p",
     "test_*.py"
-  ],
+],
   "python.testing.pytestEnabled": false,
   "python.testing.unittestEnabled": true,
   "python.testing.pytestArgs": ["practice_assessments"]

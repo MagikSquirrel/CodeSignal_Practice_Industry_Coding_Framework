@@ -100,6 +100,30 @@ def FILE_SEARCH_AT(timestamp, prefix):
     output = FILE_SEARCH(prefix)
     return output.replace("found ", "found at ")
 
+def ROLLBACK(timestamp):
+
+    # Delete anything after the rollback
+    rollback = datetime.fromisoformat(timestamp)
+
+    deletions = []
+    for file,size in files.items():
+        if file in times:
+            filetime = datetime.fromisoformat(times.get(file))
+            if filetime > rollback:
+                #print("too new, rollbak")
+                deletions.append(file)
+
+
+    for file in deletions:
+        if file in expires:
+            expires.pop(file)
+        if file in times:
+            times.pop(file)
+        if file in files:
+            files.pop(file)
+
+    return f"rollback to {timestamp}"
+
 def simulate_coding_framework(list_of_lists):
     """
     Simulates a coding framework operation on a list of lists of strings.
@@ -129,8 +153,10 @@ def simulate_coding_framework(list_of_lists):
             output.append(FILE_SEARCH(event[1]))
         elif "FILE_SEARCH_AT" == op:
             output.append(FILE_SEARCH_AT(event[1], event[2]))
+        elif "ROLLBACK" == op:
+            output.append(ROLLBACK(event[1]))
         else:
-            raise NotImplemented
+            raise NotImplementedError(f"Don't know how to {op}")
 
     return output
     #return ["uploaded Cars.txt", "got Cars.txt", "copied Cars.txt to Cars2.txt", "got Cars2.txt"]

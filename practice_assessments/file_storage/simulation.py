@@ -47,6 +47,16 @@ def FILE_COPY(source, dest):
     files[dest] = files.get(source) if source in files else None
     return f"copied {source} to {dest}"
 
+def FILE_SEARCH(prefix):
+    # Find files matching name
+    matches = list(filter(lambda x: x.startswith(prefix), files.keys()))
+
+    # Sort by size
+    matches.sort(key=lambda x: files.get(x), reverse=True)
+
+    # TODO Limit 10
+    return f"found {matches}".replace("'", "")
+
 def simulate_coding_framework(list_of_lists):
     """
     Simulates a coding framework operation on a list of lists of strings.
@@ -63,6 +73,10 @@ def simulate_coding_framework(list_of_lists):
             output.append(FILE_UPLOAD(event[1], event[2]))
         elif "FILE_COPY" == op:
             output.append(FILE_COPY(event[1], event[2]))
+        elif "FILE_SEARCH":
+            output.append(FILE_SEARCH(event[1]))
+        else:
+            raise NotImplemented
 
     return output
     #return ["uploaded Cars.txt", "got Cars.txt", "copied Cars.txt to Cars2.txt", "got Cars2.txt"]
